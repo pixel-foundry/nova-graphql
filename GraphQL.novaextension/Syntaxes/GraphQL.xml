@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<syntax name="graphql">
+	<meta>
+		<name>GraphQL</name>
+		<type>structured</type>
+		<preferred-file-extension>graphql</preferred-file-extension>
+	</meta>
+
+	<detectors>
+		<extension priority="1.0">gql,graphql,graphqls</extension>
+	</detectors>
+
+	<indentation>
+		<increase>
+				<expression>(\{[^}\"']*$)|(\[[^\]\"']*$)|(\([^)\"']*$)</expression>
+		</increase>
+		<decrease>
+				<expression>^\s*(\s*/\*.*\*/\s*)*[\}\]\)\\]</expression>
+		</decrease>
+	</indentation>
+
+	<comments>
+		<single>
+			<expression>#</expression>
+		</single>
+	</comments>
+
+	<brackets>
+		<pair open="{" close="}" />
+		<pair open="[" close="]" />
+		<pair open="(" close=")" />
+	</brackets>
+
+	<surrounding-pairs>
+		<pair open="{" close="}" />
+		<pair open="[" close="]" />
+		<pair open="(" close=")" />
+		<pair open="&quot;" close="&quot;" />
+	</surrounding-pairs>
+
+	<symbols redefinition="within-construct">
+		<local scope="within-construct" />
+		<documentation mode="before" match-multiple="comment" />
+		<documentation mode="after" match-multiple="comment" />
+	</symbols>
+
+	<scopes>
+		<include syntax="self" collection="comments" />
+		<include syntax="self" collection="definitions" />
+		<include syntax="self" collection="identifiers" />
+		<include syntax="self" collection="keywords" />
+		<include syntax="self" collection="values" />
+	</scopes>
+
+	<collections>
+		<collection name="values">
+			<scope name="graphql.string.singleline">
+				<expression>&quot;(?:[^&quot;\\]|\\.)*(?:&quot;|$)</expression>
+			</scope>
+			<scope name="graphql.value.null">
+				<strings>
+					<string>null</string>
+				</strings>
+			</scope>
+			<scope name="graphql.value.boolean">
+				<strings>
+					<string>true</string>
+					<string>false</string>
+				</strings>
+			</scope>
+			<scope name="graphql.value.number">
+				<expression>\b\-?(?:\d+(?:\.\d)?|(?:\.\d+))\b</expression>
+			</scope>
+		</collection>
+
+		<collection name="comments">
+			<scope name="graphql.comment.single" spell-check="true">
+				<expression>\#(.*)$</expression>
+				<capture number="1" name="graphql.comment.content" />
+			</scope>
+		</collection>
+
+		<collection name="definitions">
+			<scope name="graphql.definition.fragment">
+				<starts-with>
+					<expression>\b(fragment)\s+(\w+)\s+(on)\s+(\w+)\s*\b</expression>
+					<capture number="1" name="graphql.keyword" />
+					<capture number="2" name="graphql.identifier.function.name" />
+					<capture number="3" name="graphql.keyword" />
+					<capture number="4" name="graphql.identifier.type.name" />
+				</starts-with>
+				<ends-with>
+					<expression>(?={)</expression>
+					<capture number="0" name="graphql.bracket" />
+				</ends-with>
+			</scope>
+			<scope name="graphql.definition.fragment">
+				<expression>(\.\.\.)(\w+)\b</expression>
+				<capture number="1" name="graphql.punctuation" />
+				<capture number="2" name="graphql.identifier.function.name" />
+			</scope>
+			<scope name="graphql.definition.operation">
+				<starts-with>
+					<expression>\b(query|mutation|subscription)\s+(\w+)\s*\b</expression>
+					<capture number="1" name="graphql.keyword" />
+					<capture number="2" name="graphql.identifier.function.name" />
+				</starts-with>
+				<ends-with>
+					<expression>(?={)</expression>
+					<capture number="0" name="graphql.bracket" />
+				</ends-with>
+				<subscopes>
+					<include syntax="self" collection="comments" />
+					<include syntax="self" collection="identifiers" />
+					<include syntax="self" collection="keywords" />
+					<include syntax="self" collection="values" />
+				</subscopes>
+			</scope>
+			<scope name="graphql.definition.selection">
+				<symbol type="closure">
+					<context behavior="subtree" group="closure" />
+				</symbol>
+				<starts-with>
+					<expression>{</expression>
+					<capture number="0" name="graphql.bracket" />
+				</starts-with>
+				<ends-with>
+					<expression>}</expression>
+					<capture number="0" name="graphql.bracket" />
+				</ends-with>
+				<subscopes>
+					<include syntax="self" collection="comments" />
+					<include syntax="self" collection="fields" />
+					<include syntax="self" collection="keywords" />
+					<include syntax="self" collection="values" />
+					<include syntax="self" scope="graphql.definition.selection" />
+				</subscopes>
+			</scope>
+
+			<scope name="graphql.definition.arguments">
+				<symbol type="closure">
+					<context behavior="subtree" group="closure" />
+				</symbol>
+				<starts-with>
+					<expression>\(</expression>
+					<capture number="0" name="graphql.bracket" />
+				</starts-with>
+				<ends-with>
+					<expression>\)</expression>
+					<capture number="0" name="graphql.bracket" />
+				</ends-with>
+				<subscopes>
+					<include syntax="self" collection="comments" />
+					<include syntax="self" collection="identifiers" />
+					<include syntax="self" collection="keywords" />
+					<include syntax="self" collection="values" />
+					<scope name="graphql.identifier.argument">
+						<symbol type="argument" />
+						<expression>\b(\w+)(?=:)</expression>
+						<capture number="1" name="graphql.identifier.argument.name" />
+					</scope>
+				</subscopes>
+			</scope>
+		</collection>
+
+		<collection name="identifiers">
+			<scope name="graphql.identifier.variable">
+				<expression>\$(\w+)</expression>
+				<capture number="1" name="graphql.identifier.variable.name" />
+			</scope>
+		</collection>
+
+		<collection name="fields">
+			<scope name="graphql.identifier.field">
+				<expression>(\w+)</expression>
+				<capture number="1" name="graphql.identifier.field.name" />
+			</scope>
+		</collection>
+
+
+		<collection name="keywords">
+			<scope name="graphql.keyword">
+				<strings>
+					<string>fragment</string>
+					<string>mutation</string>
+					<string>on</string>
+					<string>query</string>
+					<string>subscription</string>
+				</strings>
+			</scope>
+			<scope name="graphql.identifier.type.basic">
+				<strings>
+					<string>Boolean</string>
+					<string>Float</string>
+					<string>ID</string>
+					<string>Int</string>
+					<string>String</string>
+				</strings>
+			</scope>
+		</collection>
+	</collections>
+
+</syntax>

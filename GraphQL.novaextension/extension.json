@@ -1,0 +1,10 @@
+{
+    "identifier": "pixelfoundry.GraphQL",
+    "name": "GraphQL",
+    "organization": "Pixel Foundry",
+    "description": "GraphQL syntax highlighting",
+    "version": "0.0.1",
+    "categories": ["languages"],
+    "repository": "https://github.com/pixel-foundry/nova-graphql",
+    "bugs": "https://github.com/pixel-foundry/nova-graphql/issues"
+}
